@@ -1,0 +1,9 @@
+﻿<Application x:Class="Depths_of_the_University_The_Battle_for_Freedom.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Depths_of_the_University_The_Battle_for_Freedom"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>

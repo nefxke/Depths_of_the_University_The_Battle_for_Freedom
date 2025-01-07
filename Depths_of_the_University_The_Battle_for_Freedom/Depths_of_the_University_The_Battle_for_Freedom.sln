@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35506.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Depths_of_the_University_The_Battle_for_Freedom", "Depths_of_the_University_The_Battle_for_Freedom.csproj", "{6514EB72-DA64-4DE1-B672-DCDDDB8BC731}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83} = {E35728BB-CBEB-4BE6-BF42-1A198E754C83}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Character", "..\Character\Character.csproj", "{0DB55A67-200B-499D-BB62-67298E430925}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83} = {E35728BB-CBEB-4BE6-BF42-1A198E754C83}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameManager", "..\GameManager\GameManager.csproj", "{8D00A3EC-863D-4392-8741-E1CAD204D2A2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83} = {E35728BB-CBEB-4BE6-BF42-1A198E754C83}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface", "..\Interface\Interface.csproj", "{E35728BB-CBEB-4BE6-BF42-1A198E754C83}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6514EB72-DA64-4DE1-B672-DCDDDB8BC731}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6514EB72-DA64-4DE1-B672-DCDDDB8BC731}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6514EB72-DA64-4DE1-B672-DCDDDB8BC731}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6514EB72-DA64-4DE1-B672-DCDDDB8BC731}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB55A67-200B-499D-BB62-67298E430925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB55A67-200B-499D-BB62-67298E430925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB55A67-200B-499D-BB62-67298E430925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB55A67-200B-499D-BB62-67298E430925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D00A3EC-863D-4392-8741-E1CAD204D2A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D00A3EC-863D-4392-8741-E1CAD204D2A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D00A3EC-863D-4392-8741-E1CAD204D2A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D00A3EC-863D-4392-8741-E1CAD204D2A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E35728BB-CBEB-4BE6-BF42-1A198E754C83}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
