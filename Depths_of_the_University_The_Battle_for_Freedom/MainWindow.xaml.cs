@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using static GameManager.Level;
 
 namespace Depths_of_the_University_The_Battle_for_Freedom
 {
@@ -37,6 +38,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при инициализации: " + ex.Message);
+                Debug.WriteLine("Ошибка при инициализации: " + ex);
             }
         }
 
@@ -60,29 +62,54 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
         public void InitializeGame()
         {
-            GameData.GameCanvas = GameCanvas;
-            GameCanvas.Loaded += GameCanvas_Loaded;
-
-            inventoryManager = new InventoryManager(InventoryGridContainer);
-            movement = new Movement(inventoryManager, this);
-
-            InventoryManager.LoadItemsSprites();
-
-            levelManager = new LevelManager();
-
-            var startPoint = new Point(0, 0);
-            var endPoint = new Point(GameData.SCREEN_WIDTH, GameData.SCREEN_HEIGHT);
-
-            levelGenerator = new LevelGenerator(GameData.SCREEN_WIDTH, GameData.SCREEN_HEIGHT, GameData.GameCanvas, startPoint, endPoint);
-
-            for (int levelNumber = 0; levelNumber < 3; levelNumber++)
+            try
             {
-                Level level = levelGenerator.GenerateLevel(levelNumber);
-                LevelManager.AddLevel(level);
-            }
+                GameData.GameCanvas = GameCanvas;
+                GameCanvas.Loaded += GameCanvas_Loaded;
 
-            InitializeSubscriptions();
-            levelGenerator.RenderLevel(0);
+                inventoryManager = new InventoryManager(InventoryGridContainer);
+                movement = new Movement(inventoryManager, this);
+
+                InventoryManager.LoadItemsSprites();
+
+                levelManager = new LevelManager();
+                
+                var startPoint = new Point(0, 0);
+                var endPoint = new Point(GameData.SCREEN_WIDTH, GameData.SCREEN_HEIGHT);
+
+                levelGenerator = new LevelGenerator(GameData.SCREEN_WIDTH, GameData.SCREEN_HEIGHT, GameData.GameCanvas, startPoint, endPoint);
+                
+                for (int levelNumber = 0; levelNumber < 3; levelNumber++)
+                {
+                    try
+                    {
+                        Level level = levelGenerator.GenerateLevel(levelNumber);
+                        LevelManager.AddLevel(level);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при генерации уровня {levelNumber}: {ex.Message}");
+                        Debug.WriteLine($"Ошибка при генерации уровня {levelNumber}: {ex}");
+                    }
+                }
+
+                InitializeSubscriptions();
+                
+                try
+                {
+                    levelGenerator.RenderLevel(0);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при рендеринге первого уровня: {ex.Message}");
+                    Debug.WriteLine($"Ошибка при рендеринге первого уровня: {ex}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка в InitializeGame(): {ex.Message}");
+                Debug.WriteLine($"Ошибка в InitializeGame(): {ex}");
+            }
         }
 
         private void HandleCatRunningAway(InventoryManager manager, Level level)
@@ -553,6 +580,20 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
                 GameData.Player.currentSpriteIndex = 0;
 
             Player.SetSprite(GameData.Player, GameData.Player.currentSpriteIndex);
+        }
+
+        public void CheckVictoryConditions(Point endPoint)
+        {
+            bool allEnemiesDefeated = GameData.Enemies.Count == 0;
+            bool allCatsFed = GameData.Cats.Count == 0;
+            bool playerReachedGoal = Math.Abs(GameData.Player.position.X - endPoint.X) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS &&
+                                     Math.Abs(GameData.Player.position.Y - endPoint.Y) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS;
+
+            if (allEnemiesDefeated && allCatsFed && playerReachedGoal)
+            {
+                MessageBox.Show("Уровень пройден!");
+                //LevelManager.LoadNextLevel();
+            }
         }
     }
 }

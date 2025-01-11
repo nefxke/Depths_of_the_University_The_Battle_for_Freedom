@@ -16,6 +16,7 @@ namespace GameManager
         public Rect Bounds { get; set; }
 
         public Collider(double x, double y, double width, double height)
+            : base(null, new Point(x, y)) 
         {
             Bounds = new Rect(x, y, width, height);
             Console.WriteLine($"Создан коллайдер: {Bounds}");
@@ -37,19 +38,48 @@ namespace GameManager
         public Point Position { get; set; }
         public BitmapImage Sprite { get; set; }
         public UIElement RenderedElement { get; set; }
-        public double Opacity { get; set; } = 1.0;
 
-        protected GameObject() { }
-        protected GameObject(BitmapImage sprite)
+        public GameObject(BitmapImage sprite, Point position)
         {
-            Sprite = sprite;
+            Sprite = sprite ?? throw new ArgumentNullException(nameof(sprite), "Sprite не может быть null");
+            Position = position;
         }
-        public abstract void Render(Canvas canvas);
+
+        public virtual void Render(Canvas canvas)
+        {
+            if (Sprite == null)
+            {
+                MessageBox.Show($"Ошибка: у объекта {GetType().Name} нет текстуры!");
+                return;
+            }
+
+            if (RenderedElement == null)
+            {
+                Image image = new Image
+                {
+                    Source = Sprite,
+                    Width = Sprite.PixelWidth,
+                    Height = Sprite.PixelHeight
+                };
+
+                Canvas.SetLeft(image, Position.X);
+                Canvas.SetTop(image, Position.Y);
+                canvas.Children.Add(image);
+                RenderedElement = image;
+
+                Console.WriteLine($"Объект {GetType().Name} ({this}) нарисован на {Position}");
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{GetType().Name} at {Position}";
+        }
     }
 
     public class FloorTile : GameObject
     {
-        public FloorTile(BitmapImage sprite) : base(sprite) { }
+        public FloorTile(BitmapImage sprite, Point position) : base(sprite, position) { }
 
         public override void Render(Canvas canvas)
         {
@@ -66,17 +96,12 @@ namespace GameManager
                 canvas.Children.Add(RenderedElement);
                 Canvas.SetZIndex(RenderedElement, 0);
             }
-            else
-            {
-                Canvas.SetLeft(RenderedElement, Position.X);
-                Canvas.SetTop(RenderedElement, Position.Y);
-            }
         }
     }
 
     public class RoomTile : GameObject
     {
-        public RoomTile(BitmapImage sprite) : base(sprite) { }
+        public RoomTile(BitmapImage sprite, Point position) : base(sprite, position) { }
 
         public override void Render(Canvas canvas)
         {
@@ -91,22 +116,17 @@ namespace GameManager
                 Canvas.SetLeft(RenderedElement, Position.X);
                 Canvas.SetTop(RenderedElement, Position.Y);
                 canvas.Children.Add(RenderedElement);
-                Canvas.SetZIndex(RenderedElement, 1); // Устанавливаем z-index для комнат
-                Console.WriteLine($"Отрендерён объект комнаты: {this.GetType().Name} на позиции {Position}");
-            }
-            else
-            {
-                Canvas.SetLeft(RenderedElement, Position.X);
-                Canvas.SetTop(RenderedElement, Position.Y);
+                Canvas.SetZIndex(RenderedElement, 1);
+                Console.WriteLine($"Отрендерён {this}");
             }
         }
     }
 
     public class RoomTileChunk : GameObject
     {
-        public RoomTileChunk(BitmapImage sprite, Point position, double chunkWidth, double chunkHeight) : base(sprite)
+        public RoomTileChunk(BitmapImage sprite, Point position, double chunkWidth, double chunkHeight)
+            : base(sprite, position)
         {
-            Position = position;
             RenderedElement = new Image
             {
                 Source = sprite,
@@ -126,9 +146,9 @@ namespace GameManager
         }
     }
 
-    public class Door : GameObject
+    public class WallTile : GameObject 
     {
-        public Door(BitmapImage sprite) : base(sprite) { }
+        public WallTile(BitmapImage sprite, Point position) : base(sprite, position) { }
 
         public override void Render(Canvas canvas)
         {
@@ -143,12 +163,29 @@ namespace GameManager
                 Canvas.SetLeft(RenderedElement, Position.X);
                 Canvas.SetTop(RenderedElement, Position.Y);
                 canvas.Children.Add(RenderedElement);
-                Canvas.SetZIndex(RenderedElement, 0);
+                Canvas.SetZIndex(RenderedElement, 2);
             }
-            else
+        }
+    }
+
+    public class Door : GameObject
+    {
+        public Door(BitmapImage sprite, Point position) : base(sprite, position) { }
+
+        public override void Render(Canvas canvas)
+        {
+            if (RenderedElement == null)
             {
+                RenderedElement = new Image
+                {
+                    Source = Sprite,
+                    Width = Sprite.PixelWidth,
+                    Height = Sprite.PixelHeight
+                };
                 Canvas.SetLeft(RenderedElement, Position.X);
                 Canvas.SetTop(RenderedElement, Position.Y);
+                canvas.Children.Add(RenderedElement);
+                Canvas.SetZIndex(RenderedElement, 2);
             }
         }
     }
