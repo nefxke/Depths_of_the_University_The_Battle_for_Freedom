@@ -134,6 +134,18 @@ namespace GameManager
 
 
 
-        
+        public void CheckVictoryConditions(Point endPoint)
+        {
+            bool allEnemiesDefeated = GameData.Enemies.Count == 0;
+            bool allCatsFed = GameData.Cats.Count == 0;
+            bool playerReachedGoal = Math.Abs(GameData.Player.position.X - endPoint.X) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS &&
+                                     Math.Abs(GameData.Player.position.Y - endPoint.Y) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS;
+
+            if (allEnemiesDefeated && allCatsFed && playerReachedGoal)
+            {
+                MessageBox.Show("Уровень пройден!");
+                //LevelManager.LoadNextLevel();
+            }
+        }
     }
 }
