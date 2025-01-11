@@ -30,21 +30,21 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             try
             {
                 InitializeGame();
+                InitializePlayer();
+
                 CompositionTarget.Rendering += UpdateGame;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при инициализации: {ex.Message}");
+                MessageBox.Show("Ошибка при инициализации: " + ex.Message);
             }
         }
 
+
+
+
         private void InitializeSubscriptions()
         {
-            GameCanvas.Loaded += GameCanvas_Loaded;
-            GameData.GameCanvas = this.GameCanvas;
-
-            InventoryManager.LoadItemsSprites();
-
             InventoryEvents.ItemAdded += OnItemAdded;
             GameManager.EventManager.ItemReceived += ShowItemReceivedMessage;
 
@@ -61,8 +61,12 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
         public void InitializeGame()
         {
             GameData.GameCanvas = GameCanvas;
+            GameCanvas.Loaded += GameCanvas_Loaded;
+
             inventoryManager = new InventoryManager(InventoryGridContainer);
             movement = new Movement(inventoryManager, this);
+
+            InventoryManager.LoadItemsSprites();
 
             levelManager = new LevelManager();
 
@@ -71,26 +75,15 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
             levelGenerator = new LevelGenerator(GameData.SCREEN_WIDTH, GameData.SCREEN_HEIGHT, GameData.GameCanvas, startPoint, endPoint);
 
-            try
+            for (int levelNumber = 0; levelNumber < 3; levelNumber++)
             {
-                // Инициализация уровней
-                for (int i = 0; i < 3; i++)
-                {
-                    Level level = levelGenerator.GenerateLevel(i);
-                    levelManager.AddLevel(level);
-                }
-
-                levelGenerator.RenderLevel(0);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при инициализации: {ex.Message}");
+                Level level = levelGenerator.GenerateLevel(levelNumber);
+                LevelManager.AddLevel(level);
             }
 
             InitializeSubscriptions();
+            levelGenerator.RenderLevel(0);
         }
-
-
 
         private void HandleCatRunningAway(InventoryManager manager, Level level)
         {
@@ -115,7 +108,6 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
                 ScaleMap(new Size(this.ActualWidth, this.ActualHeight));
             }
         }
-
         private void ScaleMap(Size windowSize)
         {
             double scaleX = windowSize.Width / GameCanvas.ActualWidth;
@@ -129,35 +121,24 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
         {
             try
             {
-                Debug.WriteLine("Updating game...");
-                if (levelGenerator != null && GameData.Player != null)
-                {
-                    levelGenerator.RenderLevel(0);
+                levelGenerator.RenderLevel(currentLevelIndex);
 
-                    if (InventoryManager.IsInventoryOpen)
-                    {
-                        UpdateInventoryDisplay(inventoryManager);
-                    }
-                    else
-                    {
-                        movement.HandlePlayerMovement(GameData.Enemies, GameCanvas);
-                        GameManager.EventManager.UpdatePlayerPositionOnCanvas();
-                        GameManager.EventManager.UpdateEnemyMovementsCore();
-                        GameManager.EventManager.UpdateEnemyPositionsOnCanvas();
-
-                        BattleSystem.CheckForEnemyDeath(GameCanvas, inventoryManager);
-                        BattleSystem.CheckForPlayerDeath();
-                    }
-                }
+                if (InventoryManager.IsInventoryOpen)
+                    UpdateInventoryDisplay(inventoryManager);
                 else
                 {
-                    MessageBox.Show("Ошибка: Некоторые объекты не инициализированы.");
+                    movement.HandlePlayerMovement(GameData.Enemies, GameCanvas);
+                    GameManager.EventManager.UpdatePlayerPositionOnCanvas();
+                    GameManager.EventManager.UpdateEnemyMovementsCore();
+                    GameManager.EventManager.UpdateEnemyPositionsOnCanvas();
+
+                    BattleSystem.CheckForEnemyDeath(GameCanvas, inventoryManager);
+                    BattleSystem.CheckForPlayerDeath();
                 }
-                Debug.WriteLine("Game updated.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при обновлении игры: {ex.Message}");
+                MessageBox.Show("Ошибка при обновлении игры: " + ex.Message);
             }
         }
 
@@ -168,11 +149,11 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             {
                 GameData.Player.PropertyChanged += (sender, e) =>
                 {
-                    if (e.PropertyName == nameof(Player.hp))
+                    if (e.PropertyName == "hp")
                         UpdateHealthBar(GameData.Player.hp);
-                    if (e.PropertyName == nameof(Player.energy))
+                    if (e.PropertyName == "energy")
                         UpdateEnergyBar(GameData.Player.energy);
-                    if (e.PropertyName == nameof(Player.exp))
+                    if (e.PropertyName == "exp")
                         UpdateExpBar(GameData.Player.exp);
                 };
 
@@ -182,7 +163,6 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
         private void OnPlayerInitialized(Player player)
         {
-            LoadPlayerTexture();
             InitializePlayerAnimationTimer();
         }
 
@@ -204,7 +184,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
                 if (Player.playerSprites != null && Player.playerSprites.Length > 0)
                 {
                     var playerImage = GameData.CreateTexture(GameData.Player.position, Player.playerSprites[0]);
-                    GameCanvas.Children.Add(Player.playerImage);
+                    GameCanvas.Children.Add(GameData.Player.playerImage);
                 }
                 else
                 {
@@ -213,7 +193,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке текстуры игрока: {ex.Message}");
+                MessageBox.Show("Ошибка при загрузке текстуры игрока: " + ex.Message);
             }
         }
 
@@ -236,7 +216,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке текстур врагов: {ex.Message}");
+                MessageBox.Show("Ошибка при загрузке текстур врагов: " + ex.Message);
             }
         }
 
@@ -271,21 +251,23 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
                 GameData.Player.PropertyChanged += (sender, e) =>
                 {
-                    if (e.PropertyName == nameof(Player.hp))
+                    if (e.PropertyName == "hp")
                         UpdateHealthBar(GameData.Player.hp);
-                    if (e.PropertyName == nameof(Player.energy))
+                    if (e.PropertyName == "energy")
                         UpdateEnergyBar(GameData.Player.energy);
-                    if (e.PropertyName == nameof(Player.exp))
+                    if (e.PropertyName == "exp")
                         UpdateExpBar(GameData.Player.exp);
                 };
 
                 Player.ExpGained += OnExpGained;
-                levelGenerator.OnPlayerInitialized(GameData.Player);
-                levelGenerator.OnPlayerSpawned(GameData.Player);
+
+
+                OnPlayerInitialized(GameData.Player);
+                OnPlayerSpawned(GameData.Player);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при инициализации игрока: {ex.Message}");
+                MessageBox.Show("Ошибка при инициализации игрока: " + ex.Message);
             }
         }
 
@@ -321,29 +303,24 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
         {
             try
             {
-                Debug.WriteLine("Initializing level...");
-                if (GameCanvas != null && GameCanvas.ActualWidth > 0 && GameCanvas.ActualHeight > 0)
-                {
-                    Point startPoint = new Point(0, 0);
-                    Point endPoint = new Point(GameCanvas.ActualWidth, GameCanvas.ActualHeight);
-
-                    levelGenerator = new LevelGenerator(GameCanvas.ActualWidth, GameCanvas.ActualHeight, GameCanvas, startPoint, endPoint);
-                    Level current_level = levelGenerator.GenerateLevel(0);
-                    levelGenerator.RenderLevel(0);
-                    Debug.WriteLine("Level initialized.");
-                }
-                else
+                if (GameCanvas == null && GameCanvas.ActualWidth <= 0 || GameCanvas.ActualHeight <= 0)
                 {
                     MessageBox.Show("Ошибка: GameCanvas имеет нулевые или отрицательные размеры.");
                     return;
                 }
+
+                Point startPoint = new Point(0, 0);
+                Point endPoint = new Point(GameCanvas.ActualWidth, GameCanvas.ActualHeight);
+
+                levelGenerator = new LevelGenerator(GameCanvas.ActualWidth, GameCanvas.ActualHeight, GameCanvas, startPoint, endPoint);
+                Level current_level = levelGenerator.GenerateLevel(0);
+                levelGenerator.RenderLevel(0);
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
             }
         }
-
 
         public void CreateInventory(InventoryManager manager)
         {
@@ -355,12 +332,11 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             try
             {
                 InitializeLevel();
-                InitializePlayer();
                 CreateInventory(inventoryManager);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при инициализации канваса: {ex.Message}");
+                MessageBox.Show("Ошибка при инициализации канваса: " + ex.Message);
             }
         }
 
@@ -473,11 +449,11 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
                 {
                     if (inventoryManager.Inventory.RemoveItem(item))
                     {
-                        ShowEnergyMessage($"Использовано: {itemName}");
+                        ShowEnergyMessage("Использовано: " + itemName);
                         UpdateInventoryDisplay(inventoryManager);
                     }
                     else
-                        MessageBox.Show($"Не удалось удалить предмет: {itemName}");
+                        MessageBox.Show("Не удалось удалить предмет: " + itemName);
                 }
             }
         }
@@ -541,7 +517,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
         private void ShowItemReceivedMessage(string itemName)
         {
-            ItemReceivedMessageTextBlock.Text = $"Получен предмет: {itemName}";
+            ItemReceivedMessageTextBlock.Text = "Получен предмет: " + itemName;
             ItemReceivedMessageTextBlock.Visibility = Visibility.Visible;
 
             var fadeOutAnimation = new DoubleAnimation
@@ -552,7 +528,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
                 BeginTime = TimeSpan.FromSeconds(0.5)
             };
 
-            ItemReceivedMessageTextBlock.BeginAnimation(TextBlock.OpacityProperty, fadeOutAnimation);
+            ItemReceivedMessageTextBlock.BeginAnimation(OpacityProperty, fadeOutAnimation);
 
             fadeOutAnimation.Completed += (sender, e) =>
             {
@@ -562,8 +538,10 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
 
         public void InitializePlayerAnimationTimer()
         {
-            GameData.animationTimer = new DispatcherTimer();
-            GameData.animationTimer.Interval = TimeSpan.FromMilliseconds(GameData.ANIMATION_INTERVAL);
+            GameData.animationTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(GameData.ANIMATION_INTERVAL)
+            };
             GameData.animationTimer.Tick += AnimationTimer_Tick;
             GameData.animationTimer.Start();
         }
@@ -574,7 +552,7 @@ namespace Depths_of_the_University_The_Battle_for_Freedom
             if (GameData.Player.currentSpriteIndex >= 2)
                 GameData.Player.currentSpriteIndex = 0;
 
-            Player.SetSprite(GameData.Player.currentSpriteIndex);
+            Player.SetSprite(GameData.Player, GameData.Player.currentSpriteIndex);
         }
     }
 }

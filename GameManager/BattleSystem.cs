@@ -1,7 +1,5 @@
 using Character;
 using Interface;
-using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -10,8 +8,6 @@ namespace GameManager
 {
     public class BattleSystem
     {
-        const double GAME_DIFFICULTY_FACTOR = 1; //  0.75 - легкий, 1 - нормальный, 1.25 - повышенный, 2 - невозможный
-
         public static void InitializeEnemyAttackTimers()
         {
             foreach (var enemy in GameData.Enemies)
@@ -33,7 +29,7 @@ namespace GameManager
         {
             foreach (var enemy in GameData.Enemies)
             {
-                double distance = Player.CalculateDistance(Player.playerImage, enemy.enemyImage);
+                double distance = Player.CalculateDistance(GameData.Player.playerImage, enemy.enemyImage);
                 if (distance < minDistance)
                     return false;
             }
@@ -58,8 +54,6 @@ namespace GameManager
                     }
                     damage += maxPenDamage;
                 }
-                else if (person is Enemy && GAME_DIFFICULTY_FACTOR != 1)
-                    damage *= GAME_DIFFICULTY_FACTOR;
 
                 return (int)damage;
             }
@@ -103,7 +97,7 @@ namespace GameManager
 
             foreach (var enemy in enemies)
             {
-                double distance = Player.CalculateDistance(Player.playerImage, enemy.enemyImage);
+                double distance = Player.CalculateDistance(GameData.Player.playerImage, enemy.enemyImage);
                 AttackEnemy(enemy, distance, GameData.MAX_ATTACK_DISTANCE, manager, playerUI);
             }
         }
@@ -119,7 +113,7 @@ namespace GameManager
             {
                 if (GameData.Player != null)
                 {
-                    double distanceToPlayer = Player.CalculateDistance(Player.playerImage, enemy.enemyImage);
+                    double distanceToPlayer = Player.CalculateDistance(GameData.Player.playerImage, enemy.enemyImage);
                     if (distanceToPlayer <= GameData.MAX_ENEMY_ATTACK_DISTANCE)
                     {
                         enemy.Attack(GameData.Player, distanceToPlayer, GameData.MAX_ENEMY_ATTACK_DISTANCE);
@@ -156,15 +150,15 @@ namespace GameManager
 
             var attackTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(enemy.attackInterval) // интервал атаки
+                Interval = TimeSpan.FromMilliseconds(enemy.attackInterval) 
             };
 
             attackTimer.Tick += (s, args) => HandleEnemyAttack();
 
             attackTimer.Start();
             GameData.enemyAttackTimers[enemy] = attackTimer;
-
             GameData.Enemies.Add(enemy);
+
             return enemy;
         }
 
@@ -194,10 +188,12 @@ namespace GameManager
 
         public static Type GetEnemyTypeForDrop(Enemy enemy, InventoryManager manager)
         {
+            Type enemyType = null;
             foreach (var type in Enemy.EnemyTypes)
                 if (enemy.GetType() == type)
-                    return type;
-            return null;
+                    enemyType = enemy.GetType();
+
+            return enemyType;
         }
 
         public static void CheckForEnemyDeath(Canvas gameCanvas, InventoryManager manager)
@@ -216,18 +212,19 @@ namespace GameManager
 
                     if (enemy.hp <= 0)
                     {
-                        if (enemy.hpText != null)
-                            gameCanvas.Children.Remove(enemy.hpText);
-
-                        if (enemy.enemyImage != null)
-                            gameCanvas.Children.Remove(enemy.enemyImage);
-
-                        // Останавливаем таймер атаки врага
                         if (GameData.enemyAttackTimers.ContainsKey(enemy))
                         {
                             GameData.enemyAttackTimers[enemy].Stop();
                             GameData.enemyAttackTimers.Remove(enemy);
                         }
+
+                        GameData.Enemies.Remove(enemy);
+
+                        if (enemy.hpText != null)
+                            gameCanvas.Children.Remove(enemy.hpText);
+
+                        if (enemy.enemyImage != null)
+                            gameCanvas.Children.Remove(enemy.enemyImage);
 
                         enemiesToRemove.Add(enemy);
                         Player.AddExp(GameData.Player, enemy.exp);
@@ -251,7 +248,9 @@ namespace GameManager
             }
 
             if (GameData.Enemies.Count == 0)
+            {
                 SpawnRandomEnemies(new Random().Next(1, 4), gameCanvas);
+            }
         }
 
 
@@ -261,8 +260,9 @@ namespace GameManager
         {
             if (GameData.Player != null && GameData.Player.hp <= 0)
             {
-                Canvas.SetLeft(Player.playerImage, 0);
-                Canvas.SetTop(Player.playerImage, 0);
+                MessageBox.Show("Вы погибли :[");
+                Canvas.SetLeft(GameData.Player.playerImage, 0);
+                Canvas.SetTop(GameData.Player.playerImage, 0);
 
                 GameData.Player.ResetStats();
             }

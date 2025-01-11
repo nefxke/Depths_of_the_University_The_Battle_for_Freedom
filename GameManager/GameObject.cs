@@ -28,6 +28,7 @@ namespace GameManager
 
         public override void Render(Canvas canvas)
         {
+            // Коллайдеры не рендерятся визуально
         }
     }
 
@@ -72,6 +73,7 @@ namespace GameManager
             }
         }
     }
+
     public class RoomTile : GameObject
     {
         public RoomTile(BitmapImage sprite) : base(sprite) { }
@@ -99,6 +101,7 @@ namespace GameManager
             }
         }
     }
+
     public class RoomTileChunk : GameObject
     {
         public RoomTileChunk(BitmapImage sprite, Point position, double chunkWidth, double chunkHeight) : base(sprite)
@@ -119,6 +122,33 @@ namespace GameManager
             if (!canvas.Children.Contains(RenderedElement))
             {
                 canvas.Children.Add(RenderedElement);
+            }
+        }
+    }
+
+    public class Door : GameObject
+    {
+        public Door(BitmapImage sprite) : base(sprite) { }
+
+        public override void Render(Canvas canvas)
+        {
+            if (RenderedElement == null)
+            {
+                RenderedElement = new Image
+                {
+                    Source = Sprite,
+                    Width = Sprite.PixelWidth,
+                    Height = Sprite.PixelHeight
+                };
+                Canvas.SetLeft(RenderedElement, Position.X);
+                Canvas.SetTop(RenderedElement, Position.Y);
+                canvas.Children.Add(RenderedElement);
+                Canvas.SetZIndex(RenderedElement, 0);
+            }
+            else
+            {
+                Canvas.SetLeft(RenderedElement, Position.X);
+                Canvas.SetTop(RenderedElement, Position.Y);
             }
         }
     }

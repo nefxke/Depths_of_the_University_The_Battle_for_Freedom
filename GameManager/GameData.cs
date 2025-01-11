@@ -1,4 +1,5 @@
 ﻿using Character;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -49,8 +50,7 @@ namespace GameManager
             playerInitPosition = new Point(0, 0);
             Player = new Technician("Игрок", playerInitPosition);
         }
-
-        private static void InitializeEnemies()
+        public static void InitializeEnemies()
         {
             if (Enemies == null)
                 return;
@@ -64,11 +64,13 @@ namespace GameManager
             }
         }
 
+
         public static void InitializeEntities()
         {
             InitializePlayer();
             InitializeEnemies();
         }
+
 
         public static Image CreateTexture(Point position, ImageSource sprite)
         {

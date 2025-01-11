@@ -302,7 +302,6 @@ namespace GameManager
                 image.UriSource = new Uri(path, UriKind.Absolute);
                 image.CacheOption = BitmapCacheOption.OnLoad;
                 image.EndInit();
-                Debug.WriteLine($"Изображение загружено: {path}");
                 return image;
             }
             catch (Exception ex)
@@ -319,7 +318,6 @@ namespace GameManager
                 return itemImagePaths[itemType];
             return null;
         }
-
 
 
         public const int MAX_SLOTS = 4;
@@ -459,7 +457,6 @@ namespace GameManager
                         if (image != null)
                         {
                             item.Image = image;
-                            Debug.WriteLine($"Изображение для рандомного предмета {item.Name} загружено успешно.");
                         }
                     }
                 }

@@ -38,7 +38,7 @@ namespace Character
         public DateTime LastSeenPlayerTime { get; set; }
         public double MoveDuration { get; set; }
         public double WaitDuration { get; set; }
-        public double TimeToWaitBeforeMove { get; set; } // Время ожидания перед движением после потери игрока из виду
+        public double TimeToWaitBeforeMove { get; set; } 
         public Point RandomDirection { get; set; }
 
         public Enemy(string name, CharacterClass charClass, int expReward, Point initialPosition, int updatePositionInterval, int _attackInterval)
@@ -72,10 +72,10 @@ namespace Character
                 Text = $"HP: {hp}",
                 Foreground = Brushes.Red,
                 FontSize = 12,
-                Visibility = Visibility.Hidden // Начальная видимость текста HP
+                Visibility = Visibility.Hidden 
             };
             Canvas.SetLeft(hpText, position.X + 50);
-            Canvas.SetTop(hpText, position.Y - 20); // Смещение текста HP выше врага
+            Canvas.SetTop(hpText, position.Y - 20); 
         }
 
 
@@ -166,7 +166,7 @@ namespace Character
 
         public override int CalculateDamage()
         {
-            return (int)(strength + dexterity / 10);
+            return (strength + dexterity / 10);
         }
     }
     public class ExcellentStudent : Enemy

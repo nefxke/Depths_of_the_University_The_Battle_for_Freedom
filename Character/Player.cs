@@ -8,16 +8,16 @@ namespace Character
 {
     public class Player : Character, INotifyPropertyChanged
     {
-        public static Image playerImage;
+        public Image playerImage;
         public static BitmapImage[] playerSprites;
 
         public double attackInterval;
 
-        public DateTime lastAttackTime = DateTime.MinValue;  // время последней атаки
-        private DispatcherTimer healingTimer;                // интервал лечения
+        public DateTime lastAttackTime = DateTime.MinValue;
+        private DispatcherTimer healingTimer;
         private DateTime lastReceivedDamageTime;
 
-        public int playerVisibilityRange = 400;
+        public readonly int playerVisibilityRange = Character.character_size * 3;
 
         private int energyRegenerationBonus;
         private DispatcherTimer energyRegenerationTimer;
@@ -31,18 +31,13 @@ namespace Character
         private DispatcherTimer healthRegenerationTimer;
         private DateTime healthRegenerationEndTime;
 
-        private DispatcherTimer energyHealingTimer; // Таймер для восстановления энергии
+        private DispatcherTimer energyHealingTimer;
 
-        // Делегат для события
         public delegate void ExpGainedEventHandler(string message);
-
-        // Событие, которое будет вызываться при получении опыта
         public static event ExpGainedEventHandler ExpGained;
 
-
-
         public Player(string name, CharacterClass charClass, Point initialPosition)
-            : base(name, charClass, 100, 100, 1, 1, 1, 1, 3)
+                : base(name, charClass, 100, 100, 1, 1, 1, 1, 3)
         {
             position = initialPosition;
             level = 1;
@@ -60,7 +55,6 @@ namespace Character
         new(new Uri("C:\\Users\\nefxk\\OneDrive\\Desktop\\STUDY\\ИТИП\\Курсовая\\Depths_of_the_University_The_Battle_for_Freedom\\images\\player\\player_walk_right_2.png")),       //  7
             };
 
-            // Инициализация изображения игрока
             playerImage = new Image
             {
                 Width = character_size,
@@ -189,11 +183,11 @@ namespace Character
             }
         }
 
-        public static void SetSprite(int spriteIndex)
+        public static void SetSprite(Player player, int spriteIndex)
         {
-            if (playerSprites != null && spriteIndex >= 0 && spriteIndex < playerSprites.Length)
+            if (Player.playerSprites != null && spriteIndex >= 0 && spriteIndex < Player.playerSprites.Length)
             {
-                playerImage.Source = playerSprites[spriteIndex];
+                player.playerImage.Source = Player.playerSprites[spriteIndex];
             }
         }
 

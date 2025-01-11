@@ -35,7 +35,7 @@ public class Movement
     {
         DispatcherTimer enemyMovementTimer = new()
         {
-            Interval = TimeSpan.FromMilliseconds(16)
+            Interval = TimeSpan.FromMilliseconds(25)
         };
         enemyMovementTimer.Tick += GameManager.EventManager.UpdateEnemyMovements;
         enemyMovementTimer.Start();
@@ -54,7 +54,6 @@ public class Movement
         double dy = playerPos.Y - enemyPos.Y;
         double distance = Math.Sqrt(dx * dx + dy * dy);
 
-        // Игрок в зоне видимости врага
         if (distance <= GameData.Player.playerVisibilityRange && distance >= GameData.SAFE_DISTANCE)
         {
             dx /= distance;
@@ -66,18 +65,15 @@ public class Movement
             enemyPos.X += dx;
             enemyPos.Y += dy;
 
-            // Сбрасываем состояние случайного блуждания
             enemy.IsWaiting = false;
             enemy.IsMovingRandomly = false;
             enemy.LastSeenPlayerTime = DateTime.Now;
         }
         else
         {
-            // Враг только что потерял игрока из виду
             if ((currentTime - enemy.LastSeenPlayerTime).TotalSeconds <= enemy.TimeToWaitBeforeMove
                 && enemy.LastSeenPlayerTime != DateTime.MinValue)
             {
-                // Ждем, не двигаясь
                 return;
             }
 
@@ -140,7 +136,6 @@ public class Movement
             enemy.hpText.Visibility = enemy.enemyImage.Visibility; // Синхронизация видимости текста HP с изображением врага
         }
     }
-
     private static Point GetRandomDirection()
     {
         double x = Character.Character.Random.NextDouble() * 2 - 1; // Случайное значение от -1 до 1
@@ -176,7 +171,7 @@ public class Movement
     {
         try
         {
-            if (Player.playerImage == null)
+            if (GameData.Player.playerImage == null)
             {
                 MessageBox.Show("Ошибка: playerImage не инициализирован.");
                 return;
@@ -220,11 +215,11 @@ public class Movement
 
                 if (GameData.isAPressed) // Влево
                 {
-                    Player.SetSprite(GameData.Player.currentSpriteIndex % 2 == 0 ? 4 : 5); // Чередуем между player_walk_left_1 и player_walk_left_2
+                    Player.SetSprite(GameData.Player, GameData.Player.currentSpriteIndex % 2 == 0 ? 4 : 5); // Чередуем между player_walk_left_1 и player_walk_left_2
                 }
                 else if (GameData.isDPressed) // Вправо
                 {
-                    Player.SetSprite(GameData.Player.currentSpriteIndex % 2 == 0 ? 6 : 7); // Чередуем между player_walk_right_1 и player_walk_right_2
+                    Player.SetSprite(GameData.Player, GameData.Player.currentSpriteIndex % 2 == 0 ? 6 : 7); // Чередуем между player_walk_right_1 и player_walk_right_2
                 }
                 else if (GameData.isWPressed || GameData.isSPressed) // Только вертикальное движение
                 {
@@ -241,13 +236,13 @@ public class Movement
                 }
 
                 if (GameData.lastDirection == 2)        // Влево
-                    Player.SetSprite(0);                // player_stand_left
+                    Player.SetSprite(GameData.Player, 0);                // player_stand_left
                 else if (GameData.lastDirection == 3)   // Вправо
-                    Player.SetSprite(1);                // player_stand_right
+                    Player.SetSprite(GameData.Player, 1);                // player_stand_right
                 else if (GameData.lastDirection == 0)   // Вверх
-                    Player.SetSprite(2);                // player_stand_back_left
+                    Player.SetSprite(GameData.Player, 2);                // player_stand_back_left
                 else if (GameData.lastDirection == 1)   // Вниз
-                    Player.SetSprite(3);                // player_stand_back_right
+                    Player.SetSprite(GameData.Player, 3);                // player_stand_back_right
             }
         }
         catch (Exception ex)
@@ -263,45 +258,38 @@ public class Movement
             double newX = GameData.Player.position.X + direction.X;
             double newY = GameData.Player.position.Y + direction.Y;
 
-            // Получаем размеры окна
             double canvasWidth = gameCanvas.ActualWidth;
             double canvasHeight = gameCanvas.ActualHeight;
 
-            // Учитываем размеры персонажа
             double playerSize = Player.character_size;
 
-            // Проверяем границы
             if (newX < 0 || newX + playerSize > canvasWidth)
-                newX = GameData.Player.position.X; // Останавливаем движение по X
+                newX = GameData.Player.position.X; 
 
             if (newY < 0 || newY + playerSize > canvasHeight)
-                newY = GameData.Player.position.Y; // Останавливаем движение по Y
+                newY = GameData.Player.position.Y;
 
-            // Проверяем каждый вражеский объект
             foreach (var enemy in enemies)
             {
                 double enemyX = enemy.position.X;
                 double enemyY = enemy.position.Y;
 
-                // Вычисляем вектор направления от игрока к врагу
                 double diffX = enemyX - newX;
                 double diffY = enemyY - newY;
 
-                // Рассчитываем расстояние
                 double distance = Math.Sqrt(diffX * diffX + diffY * diffY);
 
-                // Если враг слишком близко, блокируем движение в его сторону
                 if (distance < GameData.SAFE_DISTANCE)
                 {
                     // Проецируем вектор движения на вектор врага
                     double dotProduct = diffX * direction.X + diffY * direction.Y;
 
-                    if (dotProduct > 0) // Движение в направлении врага
+                    if (dotProduct > 0) 
                     {
                         if (Math.Abs(direction.X) > Math.Abs(direction.Y))
-                            newX = GameData.Player.position.X; // Блокируем движение по X
+                            newX = GameData.Player.position.X; 
                         else
-                            newY = GameData.Player.position.Y; // Блокируем движение по Y
+                            newY = GameData.Player.position.Y;
                     }
                 }
             }
@@ -314,22 +302,19 @@ public class Movement
                     if (collider.Intersects(new Collider(newX, newY, playerSize, playerSize)))
                     {
                         if (Math.Abs(direction.X) > Math.Abs(direction.Y))
-                            newX = GameData.Player.position.X; // Блокируем движение по X
+                            newX = GameData.Player.position.X; 
                         else
-                            newY = GameData.Player.position.Y; // Блокируем движение по Y
+                            newY = GameData.Player.position.Y; 
                         break;
                     }
                 }
             }
 
-            // Обновляем позицию игрока
             GameData.Player.position = new Point(newX, newY);
-
-            // Синхронизация визуальной позиции
-            if (Player.playerImage != null)
+            if (GameData.Player.playerImage != null)
             {
-                Canvas.SetLeft(Player.playerImage, newX);
-                Canvas.SetTop(Player.playerImage, newY);
+                Canvas.SetLeft(GameData.Player.playerImage, newX);
+                Canvas.SetTop(GameData.Player.playerImage, newY);
             }
         }
         catch (Exception ex)
@@ -337,10 +322,8 @@ public class Movement
             MessageBox.Show($"Ошибка при движении игрока: {ex.Message}");
         }
     }
-
     public void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        // Обновляем состояние клавиш
         switch (e.Key)
         {
             case Key.W:
@@ -404,7 +387,7 @@ public class Movement
         if (GameData.Player.currentSpriteIndex >= 2)
             GameData.Player.currentSpriteIndex = 0;
 
-        Player.SetSprite(GameData.Player.currentSpriteIndex);
+        Player.SetSprite(GameData.Player, GameData.Player.currentSpriteIndex);
     }
 
     public void InitializePlayerAnimationTimer()

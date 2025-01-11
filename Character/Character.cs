@@ -7,7 +7,7 @@ namespace Character
     public abstract class Character : INotifyPropertyChanged
     {
         public Point position;                                                      // Текущая позиция персонажа на Canvas
-        public const int character_size = 100;
+        public const int character_size = 96;
         public int currentSpriteIndex;                                              // Индекс текущего спрайта
         public int SpriteAnimationInterval;                                         // Интервал смены спрайтов в миллисекундах
 

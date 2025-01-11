@@ -1,5 +1,7 @@
 using Character;
 using System.Diagnostics;
+using System.Net;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace GameManager
@@ -22,7 +24,7 @@ namespace GameManager
 
             foreach (var cat in GameData.Cats)
             {
-                var distance = Character.Character.CalculateDistance(Player.playerImage, cat.catImage);
+                var distance = Character.Character.CalculateDistance(GameData.Player.playerImage, cat.catImage);
                 if (distance < minDistance)
                 {
                     minDistance = distance;
@@ -99,22 +101,22 @@ namespace GameManager
             return chance;
         }
 
-        //  ОБНОВЛЕНИЕ КАНВАСА
         public static void UpdateEnemyMovementsCore()
         {
             foreach (var enemy in GameData.Enemies)
                 Movement.MoveEnemy(enemy, GameData.GameCanvas);
         }
+
         public static void UpdateEnemyMovements(object sender, EventArgs e)
         {
             UpdateEnemyMovementsCore();
         }
         public static void UpdatePlayerPositionOnCanvas()
         {
-            if (Player.playerImage != null)
+            if (GameData.Player.playerImage != null)
             {
-                Canvas.SetLeft(Player.playerImage, GameData.Player.position.X);
-                Canvas.SetTop(Player.playerImage, GameData.Player.position.Y);
+                Canvas.SetLeft(GameData.Player.playerImage, GameData.Player.position.X);
+                Canvas.SetTop(GameData.Player.playerImage, GameData.Player.position.Y);
             }
         }
         public static void UpdateEnemyPositionsOnCanvas()
@@ -126,6 +128,23 @@ namespace GameManager
                     Canvas.SetLeft(enemy.enemyImage, enemy.position.X);
                     Canvas.SetTop(enemy.enemyImage, enemy.position.Y);
                 }
+            }
+        }
+
+
+
+
+        public void CheckVictoryConditions(Point endPoint)
+        {
+            bool allEnemiesDefeated = GameData.Enemies.Count == 0;
+            bool allCatsFed = GameData.Cats.Count == 0;
+            bool playerReachedGoal = Math.Abs(GameData.Player.position.X - endPoint.X) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS &&
+                                     Math.Abs(GameData.Player.position.Y - endPoint.Y) <= LevelGenerator.PLAYER_VISIBILITY_RADIUS;
+
+            if (allEnemiesDefeated && allCatsFed && playerReachedGoal)
+            {
+                MessageBox.Show("Уровень пройден!");
+                //LevelManager.LoadNextLevel();
             }
         }
     }
