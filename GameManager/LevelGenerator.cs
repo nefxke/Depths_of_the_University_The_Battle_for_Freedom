@@ -276,34 +276,25 @@ namespace GameManager
             private List<Rect> GenerateRooms()
             {
                 List<Rect> rooms = new(ROOM_COUNT);
-                int maxAttempts = 1000;
-
+                
                 for (int i = 0; i < ROOM_COUNT; i++)
                 {
-                    int roomWidthChunks = random.Next(8, 15);
-                    int roomHeightChunks = random.Next(8, 15);
-                    int attempts = 0;
+                    int roomWidthChunks = random.Next(8, 15);            // Количество блоков по ширине
+                    int roomHeightChunks = random.Next(8, 15);           // Количество блоков по высоте
 
-                    int roomX, roomY;
-                    do
+                    int roomX = 0;
+
+                    bool isRoomValid = false;
+                    while (!isRoomValid)
                     {
-                        var roomWidth = roomWidthChunks * BLOCK_SIZE;
-                        var roomHeight = roomHeightChunks * BLOCK_SIZE;
-
-                        roomX = random.Next(0, (int)width - roomWidth + 1);
-                        roomY = random.Next(0, (int)height - roomHeight + 1);
-                        attempts++;
-                    } while ((roomX + roomWidthChunks * BLOCK_SIZE > GameData.SCREEN_WIDTH ||
-                              roomY + roomHeightChunks * BLOCK_SIZE > GameData.SCREEN_HEIGHT) && attempts < maxAttempts);
-
-                    if (attempts >= maxAttempts)
-                    {
-                        MessageBox.Show("Failed to generate a valid room within the maximum number of attempts.");
-                        continue; 
+                        roomX = random.Next(0, (int)width - roomWidthChunks * BLOCK_SIZE + 1);
+                        int roomY = random.Next(0, (int)height - roomHeightChunks * BLOCK_SIZE + 1);
+                        if (IsRoomValid(grid, roomX, roomY, roomWidthChunks, roomHeightChunks))
+                        {
+                            isRoomValid = true;
+                            CreateRoom(grid, roomX, roomY, roomWidthChunks, roomHeightChunks, current_level);
+                        }
                     }
-
-                    if (IsRoomValid(grid, roomX, roomY, roomWidthChunks, roomHeightChunks))
-                        CreateRoom(grid, roomX, roomY, roomWidthChunks, roomHeightChunks, current_level);
                 }
                 return rooms;
             }
